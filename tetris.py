@@ -1,4 +1,6 @@
 import sys, pygame
+import copy
+import random
 pygame.init()
 
 black = 0, 0, 0
@@ -19,13 +21,13 @@ all_pts = {
     "o_pts": [[150, 25], [175, 25], [175, 50], [175, 75], [150, 75], [125, 75], [125, 50], [125, 25]]
 }
 
-pieces = [Piece(all_pts["s_pts"], (255, 0, 0)),
-          Piece(all_pts["z_pts"], (255, 0, 0)),
-          Piece(all_pts["j_pts"], (255, 0, 0)),
-          Piece(all_pts["l_pts"], (255, 0, 0)),
-          Piece(all_pts["t_pts"], (255, 0, 0)),
-          Piece(all_pts["i_pts"], (255, 0, 0)),
-          Piece(all_pts["o_pts"], (255, 0, 0))]
+pieces = [Piece(copy.deepcopy(all_pts["s_pts"]), (255, 0, 0)),
+          Piece(copy.deepcopy(all_pts["z_pts"]), (255, 0, 0)),
+          Piece(copy.deepcopy(all_pts["j_pts"]), (255, 0, 0)),
+          Piece(copy.deepcopy(all_pts["l_pts"]), (255, 0, 0)),
+          Piece(copy.deepcopy(all_pts["t_pts"]), (255, 0, 0)),
+          Piece(copy.deepcopy(all_pts["i_pts"]), (255, 0, 0)),
+          Piece(copy.deepcopy(all_pts["o_pts"]), (255, 0, 0))]
 piece_names = ["s", "z", "j", "l", "t", "i", "o"]
 
 def draw_grid():
@@ -48,9 +50,9 @@ curr_piece = pygame.draw.polygon(screen, pieces[curr_piece_index].color, pieces[
 while 1:
     if new_piece:
         # reset start position for next piece of the same type
-        pieces[curr_piece_index] = Piece(all_pts[piece_names[curr_piece_index] + "_pts"], (255, 0, 0))
+        pieces[curr_piece_index] = Piece(copy.deepcopy(all_pts[piece_names[curr_piece_index] + "_pts"]), (255, 0, 0))
 
-        curr_piece_index = 0
+        curr_piece_index = random.randint(0,6)
         new_piece = False
 
     for event in pygame.event.get():
@@ -64,6 +66,8 @@ while 1:
                 pieces[curr_piece_index].pts = move_poly(pieces[curr_piece_index].pts, 0, 25)
             elif event.key == pygame.K_d and curr_piece.left + curr_piece.width < 275:
                 pieces[curr_piece_index].pts = move_poly(pieces[curr_piece_index].pts, 25, 0)
+            elif event.key == pygame.K_r:
+                new_piece = True;
 
     screen.fill(black)
 
