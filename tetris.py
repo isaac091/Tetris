@@ -1,7 +1,5 @@
-import sys, pygame
-import copy
-import random
-import time
+import sys, pygame, copy, random, time, numpy as np
+
 pygame.init()
 
 black = 0, 0, 0
@@ -93,6 +91,17 @@ new_piece = True
 curr_piece_index = 0
 curr_piece = pieces[0]
 
+col_tops = np.full((1, 10), 21)
+dead_blocks = []
+dead_blocks_colors = []
+
+
+def is_collision():
+    for coord in curr_piece.rect_coords:
+        for block in dead_blocks:
+            if coord[0] == block[0] and coord[1] + 1 == block[1]:
+                return True
+
 while 1:
     if new_piece:
         # reset start position for next piece of the same type
@@ -102,9 +111,12 @@ while 1:
         curr_piece = pieces[curr_piece_index]
         new_piece = False
 
-    if curr_piece.get_bottom() > 21:
-        '''TODO: add logic for saving final positions of rectangles and update if statement to track if a piece hits the top of a column, not just the bottom '''
-        new_piece = True;
+    if curr_piece.get_bottom() > 20 or is_collision():
+        for coord in curr_piece.rect_coords:
+            dead_blocks.append(coord)
+            dead_blocks_colors.append(curr_piece.color)
+
+        new_piece = True
 
     if time.time() - last_time_moved >= .5:
         last_time_moved = time.time()
@@ -126,6 +138,9 @@ while 1:
                 new_piece = True;
 
     screen.fill(black)
+
+    for i in range(len(dead_blocks)):
+        pygame.draw.rect(screen, dead_blocks_colors[i], pygame.Rect(dead_blocks[i][0] * sq_size, dead_blocks[i][1] * sq_size, sq_size, sq_size))
 
     curr_piece.draw()
 
