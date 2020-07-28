@@ -89,6 +89,8 @@ def draw_grid():
         pygame.draw.line(screen, (255, 255, 255), [sq_size, i * sq_size], [(board_width + 1) * sq_size, i * sq_size])
 
 last_time_moved = time.time()
+piece_place_delay = time.time()
+delay_started = False
 new_piece = True
 curr_piece_index = 0
 curr_piece = pieces[0]
@@ -97,11 +99,22 @@ col_tops = np.full((1, board_width), board_height + 1)
 dead_blocks = []
 dead_blocks_colors = []
 
+move_delay = .5
 
-def is_collision():
+def is_collision(direction):
+    dir_x = 0
+    dir_y = 0
+
+    if direction == "left":
+        dir_x = -1
+    elif direction == "right":
+        dir_x = 1
+    elif direction == "down":
+        dir_y = 1
+
     for coord in curr_piece.rect_coords:
         for block in dead_blocks:
-            if coord[0] == block[0] and coord[1] + 1 == block[1]:
+            if coord[0] + dir_x == block[0] and coord[1] + dir_y == block[1]:
                 return True
 
 while 1:
@@ -111,17 +124,25 @@ while 1:
 
         curr_piece_index = random.randint(0,6)
         curr_piece = pieces[curr_piece_index]
+
         new_piece = False
+        delay_started = False
 
-    if curr_piece.get_bottom() > board_height or is_collision():
-        for coord in curr_piece.rect_coords:
-            dead_blocks.append(coord)
-            dead_blocks_colors.append(curr_piece.color)
+    if curr_piece.get_bottom() > board_height or is_collision("down"):
+        if not delay_started:
+            piece_place_delay = time.time()
+            delay_started = True
 
-        new_piece = True
+        if delay_started and time.time() - piece_place_delay > move_delay - .01:
+            for coord in curr_piece.rect_coords:
+                dead_blocks.append(coord)
+                dead_blocks_colors.append(curr_piece.color)
 
-    move_delay = .5
-    if time.time() - last_time_moved >= move_delay:
+            new_piece = True
+    else:
+        delay_started = False
+
+    if time.time() - last_time_moved > move_delay and not is_collision("down") and not curr_piece.get_bottom() > board_height:
         last_time_moved = time.time()
         curr_piece.move(0, 1)
 
@@ -129,13 +150,13 @@ while 1:
         if event.type == pygame.QUIT: sys.exit()
 
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w and curr_piece.get_top() > 1:
+            if event.key == pygame.K_w and curr_piece.get_top() > 1: # change to rotate
                 curr_piece.move(0, -1)
-            elif event.key == pygame.K_a and curr_piece.get_left() > 1:
+            elif event.key == pygame.K_a and curr_piece.get_left() > 1 and not is_collision("left"):
                 curr_piece.move(-1, 0)
-            elif event.key == pygame.K_s and curr_piece.get_bottom() < board_height + 1:
+            elif event.key == pygame.K_s and curr_piece.get_bottom() < board_height + 1 and not is_collision("down"):
                 curr_piece.move(0, 1)
-            elif event.key == pygame.K_d and curr_piece.get_right() < board_width + 1:
+            elif event.key == pygame.K_d and curr_piece.get_right() < board_width + 1 and not is_collision("right"):
                 curr_piece.move(1, 0)
             elif event.key == pygame.K_r:
                 new_piece = True;
