@@ -10,7 +10,7 @@ board_height = 20
 
 class Piece:
     def __init__(self, rect_coords, color, shape):
-        # in the form [(left_coord, top_coord), (l, t), (l, t), (l, t)]
+        # in the form [[left_coord, top_coord], [l, t], [l, t], [l, t]]
         self.rect_coords = rect_coords
 
         # in the form (r, g, b)
@@ -18,6 +18,9 @@ class Piece:
 
         # i.e. 's'
         self.shape = shape
+
+        # used for rotation
+        self.state = 0
 
     def draw(self):
         for coord in self.rect_coords:
@@ -27,6 +30,119 @@ class Piece:
         for i in range(4):
             self.rect_coords[i][0] = self.rect_coords[i][0] + x
             self.rect_coords[i][1] = self.rect_coords[i][1] + y
+
+    def rotate(self):
+        new_pos = []
+
+        if self.shape == "s":
+            new_pos = self.__get_rotated_s()
+        elif self.shape == "z":
+            new_pos = self.__get_rotated_z()
+        elif self.shape == "j":
+            new_pos = self.__get_rotated_j()
+        elif self.shape == "l":
+            new_pos = self.__get_rotated_l()
+        elif self.shape == "t":
+            new_pos = self.__get_rotated_t()
+        elif self.shape == "i":
+            new_pos = self.__get_rotated_i()
+        elif self.shape == "o":
+            return
+
+        for rect in new_pos:
+            if rect[0] < 1 or rect[0] > board_width or rect[1] < 1 or rect[1] > board_height:
+                return
+
+            for block in dead_blocks:
+                if block[0] == rect[0] and block[1] == rect[1]:
+                    return
+
+        self.rect_coords = new_pos
+        self.state = (self.state + 1) % 4
+
+    def __get_rotated_s(self):
+        new_pos = []
+
+        new_pos.append([self.rect_coords[0][0] + 2 * pow(-1, self.state), self.rect_coords[0][1]])
+        new_pos.append([self.rect_coords[1][0], self.rect_coords[1][1]])
+        new_pos.append([self.rect_coords[2][0], self.rect_coords[2][1]])
+        new_pos.append([self.rect_coords[3][0], self.rect_coords[3][1] - 2 * pow(-1, self.state)])
+
+        return new_pos
+
+    def __get_rotated_z(self):
+        new_pos = []
+
+        new_pos.append([self.rect_coords[0][0], self.rect_coords[0][1] + 2 * pow(-1, self.state)])
+        new_pos.append([self.rect_coords[1][0] - 2 * pow(-1, self.state), self.rect_coords[1][1]])
+        new_pos.append([self.rect_coords[2][0], self.rect_coords[2][1]])
+        new_pos.append([self.rect_coords[3][0], self.rect_coords[3][1]])
+
+        return new_pos
+
+    def __get_rotated_j(self):
+        new_pos = []
+
+        new_pos.append([self.rect_coords[0][0] + 1 * pow(-1, self.state), self.rect_coords[0][1] + 1 * pow(-1, self.state)])
+        new_pos.append([self.rect_coords[1][0], self.rect_coords[1][1]])
+        new_pos.append([self.rect_coords[2][0] - 1 * pow(-1, self.state), self.rect_coords[2][1] - 1 * pow(-1, self.state)])
+
+        if self.state == 0:
+            new_pos.append([self.rect_coords[3][0], self.rect_coords[3][1] - 2])
+        elif self.state == 1:
+            new_pos.append([self.rect_coords[3][0] + 2, self.rect_coords[3][1]])
+        elif self.state == 2:
+            new_pos.append([self.rect_coords[3][0], self.rect_coords[3][1] + 2])
+        elif self.state == 3:
+            new_pos.append([self.rect_coords[3][0] - 2, self.rect_coords[3][1]])
+
+        return new_pos
+
+    def __get_rotated_l(self):
+        new_pos = []
+
+        new_pos.append([self.rect_coords[0][0] + 1 * pow(-1, self.state), self.rect_coords[0][1] + 1 * pow(-1, self.state)])
+        new_pos.append([self.rect_coords[1][0], self.rect_coords[1][1]])
+        new_pos.append([self.rect_coords[2][0] - 1 * pow(-1, self.state), self.rect_coords[2][1] - 1 * pow(-1, self.state)])
+
+        if self.state == 0:
+            new_pos.append([self.rect_coords[3][0] - 2, self.rect_coords[3][1]])
+        elif self.state == 1:
+            new_pos.append([self.rect_coords[3][0], self.rect_coords[3][1] - 2])
+        elif self.state == 2:
+            new_pos.append([self.rect_coords[3][0] + 2, self.rect_coords[3][1]])
+        elif self.state == 3:
+            new_pos.append([self.rect_coords[3][0], self.rect_coords[3][1] + 2])
+
+        return new_pos
+
+    def __get_rotated_t(self):
+        new_pos = []
+
+        new_pos.append([self.rect_coords[0][0] + 1 * pow(-1, self.state), self.rect_coords[0][1] + 1 * pow(-1, self.state)])
+        new_pos.append([self.rect_coords[1][0], self.rect_coords[1][1]])
+        new_pos.append([self.rect_coords[2][0] - 1 * pow(-1, self.state), self.rect_coords[2][1] - 1 * pow(-1, self.state)])
+
+        if self.state == 0:
+            new_pos.append([self.rect_coords[3][0] - 1, self.rect_coords[3][1] + 1])
+        elif self.state == 1:
+            new_pos.append([self.rect_coords[3][0] - 1, self.rect_coords[3][1] - 1])
+        elif self.state == 2:
+            new_pos.append([self.rect_coords[3][0] + 1, self.rect_coords[3][1] - 1])
+        elif self.state == 3:
+            new_pos.append([self.rect_coords[3][0] + 1, self.rect_coords[3][1] + 1])
+
+        return new_pos
+
+    def __get_rotated_i(self):
+        new_pos = []
+
+        new_pos.append([self.rect_coords[0][0] + 2 * pow(-1, self.state), self.rect_coords[0][1] - 2 * pow(-1, self.state)])
+        new_pos.append([self.rect_coords[1][0] + 1 * pow(-1, self.state), self.rect_coords[1][1] - 1 * pow(-1, self.state)])
+        new_pos.append([self.rect_coords[2][0], self.rect_coords[2][1]])
+        new_pos.append([self.rect_coords[3][0] - 1 * pow(-1, self.state), self.rect_coords[3][1] + 1 * pow(-1, self.state)])
+
+        return new_pos
 
     def get_left(self):
         left = board_width
@@ -121,6 +237,7 @@ while 1:
     if new_piece:
         # reset start position for next piece of the same type
         pieces[curr_piece_index].rect_coords = copy.deepcopy(block_rects[pieces[curr_piece_index].shape + "_rects"])
+        pieces[curr_piece_index].state = 0
 
         curr_piece_index = random.randint(0,6)
         curr_piece = pieces[curr_piece_index]
@@ -150,8 +267,8 @@ while 1:
         if event.type == pygame.QUIT: sys.exit()
 
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w and curr_piece.get_top() > 1: # change to rotate
-                curr_piece.move(0, -1)
+            if event.key == pygame.K_w and curr_piece.get_top() > 1:
+                curr_piece.rotate()
             elif event.key == pygame.K_a and curr_piece.get_left() > 1 and not is_collision("left"):
                 curr_piece.move(-1, 0)
             elif event.key == pygame.K_s and curr_piece.get_bottom() < board_height + 1 and not is_collision("down"):
