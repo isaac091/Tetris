@@ -7,6 +7,7 @@ screen = pygame.display.set_mode([750, 750])
 sq_size = 25
 board_width = 10
 board_height = 20
+lines_cleared = 0
 
 class Piece:
     def __init__(self, rect_coords, color, shape):
@@ -204,6 +205,13 @@ def draw_grid():
     for i in range (1, board_height + 2):
         pygame.draw.line(screen, (255, 255, 255), [sq_size, i * sq_size], [(board_width + 1) * sq_size, i * sq_size])
 
+def draw_score():
+    font = pygame.font.Font("freesansbold.ttf", 32)
+    text = font.render("Lines " + str(lines_cleared), True, (255, 255, 255))
+    textRect = text.get_rect()
+    textRect.center = (15 * sq_size, 5 * sq_size)
+    screen.blit(text, textRect)
+
 last_time_moved = time.time()
 piece_place_delay = time.time()
 delay_started = False
@@ -232,6 +240,28 @@ def is_collision(direction):
         for block in dead_blocks:
             if coord[0] + dir_x == block[0] and coord[1] + dir_y == block[1]:
                 return True
+
+def clear_full_lines():
+    cleared = 0
+
+    for i in range(1, board_height + 1):
+        num_blocks_in_row = 0
+
+        for block in dead_blocks:
+            if block[1] == i:
+                num_blocks_in_row = num_blocks_in_row + 1
+
+        if num_blocks_in_row == board_width:
+            cleared += 1
+
+            for j in reversed(range(len(dead_blocks))):
+                if dead_blocks[j][1] == i:
+                    del dead_blocks[j]
+                    del dead_blocks_colors[j]
+                elif dead_blocks[j][1] < i:
+                    dead_blocks[j][1] = dead_blocks[j][1] + 1
+
+    return cleared
 
 while 1:
     if new_piece:
@@ -280,11 +310,14 @@ while 1:
 
     screen.fill(black)
 
+    lines_cleared += clear_full_lines()
+
     for i in range(len(dead_blocks)):
         pygame.draw.rect(screen, dead_blocks_colors[i], pygame.Rect(dead_blocks[i][0] * sq_size, dead_blocks[i][1] * sq_size, sq_size, sq_size))
 
     curr_piece.draw()
 
     draw_grid()
+    draw_score()
 
     pygame.display.flip()
