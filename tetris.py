@@ -9,6 +9,7 @@ board_width = 10
 board_height = 20
 lines_cleared = 0
 lines_until_next_level = 10
+is_game_over = False
 
 class Piece:
     def __init__(self, rect_coords, color, shape):
@@ -213,6 +214,13 @@ def draw_score():
     textRect.center = (15 * sq_size, 5 * sq_size)
     screen.blit(text, textRect)
 
+def draw_game_over():
+    font = pygame.font.Font("freesansbold.ttf", 32)
+    text = font.render("Game Over", True, (255, 255, 255))
+    textRect = text.get_rect()
+    textRect.center = (15 * sq_size, 10 * sq_size)
+    screen.blit(text, textRect)
+
 last_time_moved = time.time()
 piece_place_delay = time.time()
 delay_started = False
@@ -281,6 +289,9 @@ while 1:
         new_piece = False
         delay_started = False
 
+        if is_collision(""):
+            is_game_over = True
+
     if is_collision("down"):
         if not delay_started:
             piece_place_delay = time.time()
@@ -291,18 +302,19 @@ while 1:
                 dead_blocks.append(coord)
                 dead_blocks_colors.append(curr_piece.color)
 
-            new_piece = True
+            if not is_game_over:
+                new_piece = True
     else:
         delay_started = False
 
-    if time.time() - last_time_moved > move_delay and not is_collision("down"):
+    if time.time() - last_time_moved > move_delay and not is_collision("down") and not is_game_over:
         last_time_moved = time.time()
         curr_piece.move(0, 1)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
 
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN and not is_game_over:
             if event.key == pygame.K_w and curr_piece.get_top() > 1:
                 curr_piece.rotate()
             elif event.key == pygame.K_a and not is_collision("left"):
@@ -333,5 +345,7 @@ while 1:
 
     draw_grid()
     draw_score()
+    if is_game_over:
+        draw_game_over()
 
     pygame.display.flip()
