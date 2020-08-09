@@ -8,6 +8,7 @@ sq_size = 25
 board_width = 10
 board_height = 20
 lines_cleared = 0
+lines_until_next_level = 10
 
 class Piece:
     def __init__(self, rect_coords, color, shape):
@@ -310,7 +311,15 @@ while 1:
 
     screen.fill(black)
 
-    lines_cleared += clear_full_lines()
+    full_lines = clear_full_lines()
+    lines_until_next_level -= full_lines
+    lines_cleared += full_lines
+
+    if lines_until_next_level <= 0:
+        lines_until_next_level += 10
+
+        if move_delay >= .1:
+            move_delay -= .02
 
     for i in range(len(dead_blocks)):
         pygame.draw.rect(screen, dead_blocks_colors[i], pygame.Rect(dead_blocks[i][0] * sq_size, dead_blocks[i][1] * sq_size, sq_size, sq_size))
