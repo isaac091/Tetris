@@ -390,13 +390,17 @@ while 1:
 
         # move or rotate the piece based on inputs
         if event.type == pygame.KEYDOWN and not is_game_over:
-            if event.key == pygame.K_w and curr_piece.get_top() > 1:
+            if ((event.key == pygame.K_w or event.key == pygame.K_UP)
+                and curr_piece.get_top() > 1):
                 curr_piece.rotate()
-            elif event.key == pygame.K_a and not is_collision("left"):
+            elif ((event.key == pygame.K_a or event.key == pygame.K_LEFT)
+                  and not is_collision("left")):
                 curr_piece.move(-1, 0)
-            elif event.key == pygame.K_s and not is_collision("down"):
+            elif ((event.key == pygame.K_s or event.key == pygame.K_DOWN)
+                  and not is_collision("down")):
                 curr_piece.move(0, 1)
-            elif event.key == pygame.K_d and not is_collision("right"):
+            elif ((event.key == pygame.K_d or event.key == pygame.K_RIGHT)
+                  and not is_collision("right")):
                 curr_piece.move(1, 0)
 
     screen.fill(background_color)
