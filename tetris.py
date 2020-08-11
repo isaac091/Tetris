@@ -211,7 +211,7 @@ def draw_score():
     font = pygame.font.Font("freesansbold.ttf", 32)
     text = font.render("Lines " + str(lines_cleared), True, (255, 255, 255))
     textRect = text.get_rect()
-    textRect.center = (15 * sq_size, 5 * sq_size)
+    textRect.center = (14 * sq_size, 5 * sq_size)
     screen.blit(text, textRect)
 
 def draw_game_over():
@@ -225,8 +225,9 @@ last_time_moved = time.time()
 piece_place_delay = time.time()
 delay_started = False
 new_piece = True
-curr_piece_index = 0
+next_piece_index = 0
 curr_piece = pieces[0]
+next_piece = copy.deepcopy(pieces[random.randint(0, 6)])
 
 col_tops = np.full((1, board_width), board_height + 1)
 dead_blocks = []
@@ -280,11 +281,11 @@ def clear_full_lines():
 while 1:
     if new_piece:
         # reset start position for next piece of the same type
-        pieces[curr_piece_index].rect_coords = copy.deepcopy(block_rects[pieces[curr_piece_index].shape + "_rects"])
-        pieces[curr_piece_index].state = 0
 
-        curr_piece_index = random.randint(0,6)
-        curr_piece = pieces[curr_piece_index]
+        curr_piece = copy.deepcopy(next_piece)
+
+        next_piece_index = random.randint(0,6)
+        next_piece = copy.deepcopy(pieces[next_piece_index])
 
         new_piece = False
         delay_started = False
@@ -342,6 +343,10 @@ while 1:
         pygame.draw.rect(screen, dead_blocks_colors[i], pygame.Rect(dead_blocks[i][0] * sq_size, dead_blocks[i][1] * sq_size, sq_size, sq_size))
 
     curr_piece.draw()
+
+    # draw next piece
+    for coord in pieces[next_piece_index].rect_coords:
+        pygame.draw.rect(screen, pieces[next_piece_index].color, pygame.Rect((coord[0] + 7) * sq_size, coord[1] * sq_size, sq_size, sq_size))
 
     draw_grid()
     draw_score()
