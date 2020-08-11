@@ -2,8 +2,8 @@ import sys, pygame, copy, random, time, numpy as np
 
 pygame.init()
 
-black = 0, 0, 0
-screen = pygame.display.set_mode([750, 750])
+background_color = (150, 150, 150)
+screen = pygame.display.set_mode([500, 600])
 sq_size = 25
 board_width = 10
 board_height = 20
@@ -203,20 +203,20 @@ pieces = [Piece(copy.deepcopy(block_rects["s_rects"]), (0, 240, 0), "s"),
 
 def draw_grid():
     for i in range(1, board_width + 2):
-        pygame.draw.line(screen, (255, 255, 255), [i * sq_size, sq_size], [i * sq_size, (board_height + 1) * sq_size])
+        pygame.draw.line(screen, (100, 100, 100), [i * sq_size, sq_size], [i * sq_size, (board_height + 1) * sq_size])
     for i in range (1, board_height + 2):
-        pygame.draw.line(screen, (255, 255, 255), [sq_size, i * sq_size], [(board_width + 1) * sq_size, i * sq_size])
+        pygame.draw.line(screen, (100, 100, 100), [sq_size, i * sq_size], [(board_width + 1) * sq_size, i * sq_size])
 
 def draw_score():
     font = pygame.font.Font("freesansbold.ttf", 32)
-    text = font.render("Lines " + str(lines_cleared), True, (255, 255, 255))
+    text = font.render("Lines " + str(lines_cleared), True, (0, 0, 0))
     textRect = text.get_rect()
     textRect.center = (14 * sq_size, 5 * sq_size)
     screen.blit(text, textRect)
 
 def draw_game_over():
     font = pygame.font.Font("freesansbold.ttf", 32)
-    text = font.render("Game Over", True, (255, 255, 255))
+    text = font.render("Game Over", True, (0, 0, 0))
     textRect = text.get_rect()
     textRect.center = (15 * sq_size, 10 * sq_size)
     screen.blit(text, textRect)
@@ -327,7 +327,7 @@ while 1:
             elif event.key == pygame.K_r:
                 new_piece = True;
 
-    screen.fill(black)
+    screen.fill(background_color)
 
     full_lines = clear_full_lines()
     lines_until_next_level -= full_lines
